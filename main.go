@@ -5,6 +5,9 @@ import (
 )
 
 func main() {
+	// 專案初始化要用這個建立資料庫
+	//db.MigrateDB(database.GetDB())
+
 	// 這裡切換api version是指切換公開出去的api url會隨著版本改變
 	// ex: 切換v1 host/api/v1/xxx
 	//     切換v2 host/api/v2/xxx
