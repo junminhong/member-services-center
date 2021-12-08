@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/junminhong/member-services-center/app/api/v1/routes"
+	"github.com/junminhong/member-services-center/config/routes"
 )
 
 func main() {
