@@ -5,10 +5,14 @@ import (
 	"github.com/junminhong/member-services-center/app/api/v1/controllers/member"
 )
 
-func InitRoutes() {
+func InitRoutes(apiVersion string) {
 	router := gin.Default()
-	v1 := router.Group("/api/v1")
-	memberRouter := v1.Group("/member")
+	var apiVersionTmp *gin.RouterGroup
+	switch apiVersion {
+	case "v1", "V1":
+		apiVersionTmp = router.Group("/api/v1")
+	}
+	memberRouter := apiVersionTmp.Group("/member")
 	{
 		memberRouter.POST("/register", member.Register)
 	}
