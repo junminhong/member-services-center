@@ -15,6 +15,7 @@ func InitRoutes(apiVersion string) {
 	memberRouter := apiVersionTmp.Group("/member")
 	{
 		memberRouter.POST("/register", member.Register)
+		memberRouter.POST("/email-auth", member.VerifyEmail)
 	}
 	router.Run(":8080")
 }

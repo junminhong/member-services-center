@@ -44,7 +44,7 @@ func sendEmailProcess(email string) string {
 			"From: membercentersmtp@gmail.com\r\n" +
 			`Content-Type: text/plain; boundary="qwertyuio"` + "\r\n" +
 			"\r\n" +
-			"請點擊以下網址連結：http://127.0.0.1:8080/auth/" + emailToken + "\r\n" +
+			"請點擊以下網址連結：http://127.0.0.1:8080/api/v1/member/email-auth/" + emailToken + "\r\n" +
 			"\r\n",
 	)
 	auth := smtp.PlainAuth("", from, password, "smtp.gmail.com")
