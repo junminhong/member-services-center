@@ -5,10 +5,11 @@
 為了實現single sign on以及加深對於微服務架構的拆分經驗，將整個架構的會員控管都交由member services center去做控管。
 
 ## 需求
-1. [ ] 註冊會員帳戶
-2. [ ] 登入會員帳戶並回傳驗證token
-3. [ ] 提供其他服務驗證會員token有效性
-4. [ ] CRUD會員資訊
+1. [x] 註冊會員帳戶
+2. [x] 會員驗證信件發送
+3. [ ] 登入會員帳戶並回傳驗證token
+4. [ ] 提供其他服務驗證會員token有效性
+5. [ ] CRUD會員資訊
 
 ## API Document
 - register [POST]: /api/v1/member/register?email=&password=
