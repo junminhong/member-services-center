@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/junminhong/member-services-center/app/api/v1/models/member"
+	"github.com/junminhong/member-services-center/app/services/smtp"
 	"github.com/junminhong/member-services-center/db"
 )
 
@@ -36,6 +37,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "註冊成功",
 		})
+		smtp.SendEmailAuth(req.Email)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "註冊失敗",
