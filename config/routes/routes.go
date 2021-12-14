@@ -3,9 +3,11 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/junminhong/member-services-center/app/api/v1/controllers/member"
+	"sync"
 )
 
-func InitRoutes(apiVersion string) {
+func InitRoutes(apiVersion string, intiServerWg *sync.WaitGroup) {
+	defer intiServerWg.Done()
 	router := gin.Default()
 	var apiVersionTmp *gin.RouterGroup
 	switch apiVersion {
