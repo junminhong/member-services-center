@@ -1,0 +1,16 @@
+
+syntax = "proto3";
+package member;
+option go_package = "github.com/junminhong/member-services-center/app/proto/member";  // generated code 的 full Go import path
+
+message TokenAuthRequest {
+  string token = 1;
+}
+
+message TokenAuthResponse {
+  bool response = 1;
+}
+
+service TokenAuthService {
+  rpc VerifyAccessToken(TokenAuthRequest) returns (TokenAuthResponse) {};
+}
