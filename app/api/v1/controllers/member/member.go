@@ -1,8 +1,11 @@
 package member
 
 import (
+	"github.com/junminhong/member-services-center/app/services/jwt"
 	"github.com/junminhong/member-services-center/config/database"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -70,7 +73,14 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+	accessToken := jwt.GenerateAccessToken(member.ID)
 	c.JSON(http.StatusOK, gin.H{
-		"message": member.EmailAuth,
+		"message": accessToken,
 	})
+}
+
+func TokenAuth(c *gin.Context) {
+	token := c.Request.Header.Get("Authorization")
+	tokenParts := strings.Split(token, "Bearer ")
+	log.Println(jwt.VerifyAccessToken(tokenParts[1]))
 }
