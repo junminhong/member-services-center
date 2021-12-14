@@ -1,6 +1,7 @@
 package member
 
 import (
+	"github.com/junminhong/member-services-center/config/database"
 	"net/http"
 	"time"
 
@@ -13,8 +14,9 @@ import (
 var postgresDB = db.PostgresDB
 
 type registerReq struct {
-	Email    string `form:"email" json:"email" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
+	Email       string `form:"email" json:"email" binding:"required"`
+	Password    string `form:"password" json:"password" binding:"required"`
+	RepPassword string `form:"rep-password" json:"rep-password" binding:"required"`
 }
 
 func Register(c *gin.Context) {
@@ -43,4 +45,32 @@ func Register(c *gin.Context) {
 			"message": "註冊失敗",
 		})
 	}
+}
+
+type loginReq struct {
+	Email    string `form:"email" json:"email" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
+}
+
+func Login(c *gin.Context) {
+	req := &loginReq{}
+	err := c.BindJSON(req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "請傳送正確資料",
+		})
+		return
+	}
+	db := database.GetDB()
+	member := &member.Member{}
+	err = db.Where("email = ?", req.Email).First(&member).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "沒有此位會員",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": member.EmailAuth,
+	})
 }
