@@ -63,19 +63,25 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	//db := database.GetDB()
 	member := &member.Member{}
 	err = postgresDB.Where("email = ?", req.Email).First(&member).Error
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "沒有此位會員",
+		c.JSON(http.StatusOK, gin.H{
+			"message": "查無此會員訊息",
 		})
 		return
 	}
-	accessToken := jwt.GenerateAccessToken(member.ID)
-	c.JSON(http.StatusOK, gin.H{
-		"message": accessToken,
-	})
+	if req.Password == member.Password {
+		accessToken := jwt.GenerateAccessToken(member.ID)
+		c.JSON(http.StatusOK, gin.H{
+			"token":      accessToken,
+			"email-auth": member.EmailAuth,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "密碼錯誤",
+		})
+	}
 }
 
 func TokenAuth(c *gin.Context) {

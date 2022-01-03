@@ -14,6 +14,8 @@ import (
 
 var ctx = context.Background()
 
+var redisClient = database.InitRedis()
+
 func getLocalSecretKey(fileName string) []byte {
 	nowWorkDir, err := os.Getwd()
 	if err != nil {
@@ -48,7 +50,7 @@ func GenerateAccessToken(memberID int) string {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	redisClient := database.InitRedis()
+	//redisClient := database.InitRedis()
 	err = redisClient.Set(ctx, accessToken, memberID, 600*time.Second).Err()
 	if err != nil {
 		log.Println(err.Error())
