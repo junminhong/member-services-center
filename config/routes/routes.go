@@ -3,6 +3,8 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/junminhong/member-services-center/app/api/v1/controllers/member"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"sync"
 )
 
@@ -38,5 +40,6 @@ func InitRoutes(apiVersion string, intiServerWg *sync.WaitGroup) {
 		memberRouter.POST("/email-auth", member.VerifyEmail)
 		memberRouter.POST("/token-auth", member.TokenAuth)
 	}
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run(":8080")
 }
