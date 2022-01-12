@@ -3,9 +3,26 @@ package main
 import (
 	"github.com/junminhong/member-services-center/app/services/grpc"
 	"github.com/junminhong/member-services-center/config/routes"
+	_ "github.com/junminhong/member-services-center/docs"
 	"sync"
 )
 
+// @title           Member Center Service API
+// @version         1.0
+// @description     This is a base golang develop member center service
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   junmin.hong
+// @contact.url    https://github.com/junminhong
+// @contact.email  junminhong1110@gmail.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.basic  BasicAuth
 func main() {
 	// 專案初始化要用這個建立資料庫
 	//db.MigrateDB(database.GetDB())
