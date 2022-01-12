@@ -30,6 +30,12 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
+	if strings.Compare(req.Password, req.RepPassword) != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "請傳送正確資料",
+		})
+		return
+	}
 	memberStruct := &member.Member{}
 	memberStruct.CreatedAt = time.Now().UTC()
 	memberStruct.UpdatedAt = time.Now().UTC()
