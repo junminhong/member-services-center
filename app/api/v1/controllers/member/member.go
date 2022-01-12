@@ -21,6 +21,18 @@ type registerReq struct {
 	RepPassword string `form:"rep-password" json:"rep-password" binding:"required"`
 }
 
+type response struct {
+	Message string `json:"message"`
+}
+
+// @Summary 註冊會員帳號
+// @Tags member
+// @version 1.0
+// @Accept application/json
+// @produce application/json
+// @param data body registerReq true "註冊資料"
+// @Success 200 {object} response "{"message":""}"
+// @Router /member/register [post]
 func Register(c *gin.Context) {
 	req := &registerReq{}
 	err := c.BindJSON(req)
