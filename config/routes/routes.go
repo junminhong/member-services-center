@@ -40,6 +40,7 @@ func InitRoutes(apiVersion string, intiServerWg *sync.WaitGroup) {
 		memberRouter.POST("/email-auth", member.VerifyEmail)
 		memberRouter.POST("/token-auth", member.TokenAuth)
 	}
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
+		ginSwagger.DefaultModelsExpandDepth(-1)))
 	router.Run(":8080")
 }
