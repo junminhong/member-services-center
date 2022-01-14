@@ -3,6 +3,7 @@ package main
 import (
 	_ "github.com/junminhong/member-services-center/docs"
 	"github.com/junminhong/member-services-center/grpc"
+	"github.com/junminhong/member-services-center/pkg/logger"
 	"github.com/junminhong/member-services-center/router"
 	"os"
 	"sync"
@@ -32,10 +33,12 @@ func main() {
 	// ex: 切換v1 host/api/v1/xxx
 	//     切換v2 host/api/v2/xxx
 	// 更改api version後還需至routes更改對應的controllers並import
-	intiServerWg := &sync.WaitGroup{}
-	intiServerWg.Add(2)
-	router := router.SetupRouter("v1", intiServerWg)
-	go grpc.InitGRpcServer(intiServerWg)
+	sugar := logger.Init()
+	defer sugar.Sync()
+	setupServerWG := &sync.WaitGroup{}
+	setupServerWG.Add(2)
+	router := router.Init("v1", setupServerWG)
+	go grpc.SetupServer(setupServerWG)
 	go router.Run(":" + os.Getenv("HOST_PORT"))
-	intiServerWg.Wait()
+	setupServerWG.Wait()
 }
