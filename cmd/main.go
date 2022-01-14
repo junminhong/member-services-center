@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/junminhong/member-services-center/app/services/grpc"
-	"github.com/junminhong/member-services-center/config/routes"
 	_ "github.com/junminhong/member-services-center/docs"
+	"github.com/junminhong/member-services-center/grpc"
+	"github.com/junminhong/member-services-center/router"
+	"os"
 	"sync"
 )
 
@@ -33,7 +34,8 @@ func main() {
 	// 更改api version後還需至routes更改對應的controllers並import
 	intiServerWg := &sync.WaitGroup{}
 	intiServerWg.Add(2)
+	router := router.SetupRouter("v1", intiServerWg)
 	go grpc.InitGRpcServer(intiServerWg)
-	go routes.InitRoutes("v1", intiServerWg)
+	go router.Run(":" + os.Getenv("HOST_PORT"))
 	intiServerWg.Wait()
 }

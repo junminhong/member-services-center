@@ -1,13 +1,13 @@
-package member
+package v1
 
 import (
 	"context"
+	"github.com/junminhong/member-services-center/db/redis"
+	"github.com/junminhong/member-services-center/model"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/junminhong/member-services-center/app/api/v1/models/member"
-	"github.com/junminhong/member-services-center/config/database"
 )
 
 var ctx = context.Background()
@@ -17,7 +17,7 @@ type emailAuthReq struct {
 }
 
 func updateEmailAuth(email string) bool {
-	err := postgresDB.Model(&member.Member{}).Where("email = ?", email).Update("email_auth", true).Error
+	err := postgresDB.Model(&model.Member{}).Where("email = ?", email).Update("email_auth", true).Error
 	return err != nil
 }
 
@@ -27,7 +27,7 @@ func VerifyEmail(c *gin.Context) {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	redisClient := database.InitRedis()
+	redisClient := redis.InitRedis()
 	email, err := redisClient.Get(ctx, req.EmailToken).Result()
 	if err != nil {
 		log.Println(err.Error())

@@ -3,13 +3,13 @@ package smtp
 import (
 	"context"
 	"encoding/base64"
+	"github.com/junminhong/member-services-center/db/redis"
 	"log"
 	"net/smtp"
 	"os"
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/junminhong/member-services-center/config/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -56,7 +56,7 @@ func sendEmailProcess(email string) string {
 }
 
 func insertEmailTokenToRedis(email string, emailToken string) {
-	redisClient := database.InitRedis()
+	redisClient := redis.InitRedis()
 	log.Println(emailToken, email)
 	err := redisClient.Set(ctx, emailToken, email, 600*time.Second).Err()
 	if err != nil {

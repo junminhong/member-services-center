@@ -1,19 +1,19 @@
-package member
+package v1
 
 import (
-	"github.com/junminhong/member-services-center/app/services/jwt"
-	"github.com/junminhong/member-services-center/config/database"
+	"github.com/junminhong/member-services-center/db/postgresql"
+	"github.com/junminhong/member-services-center/model"
+	"github.com/junminhong/member-services-center/pkg/jwt"
+	"github.com/junminhong/member-services-center/pkg/smtp"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/junminhong/member-services-center/app/api/v1/models/member"
-	"github.com/junminhong/member-services-center/app/services/smtp"
 )
 
-var postgresDB = database.GetDB()
+var postgresDB = postgresql.GetDB()
 
 type registerReq struct {
 	Email       string `form:"email" json:"email" binding:"required"`
@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
-	memberStruct := &member.Member{}
+	memberStruct := &model.Member{}
 	memberStruct.CreatedAt = time.Now().UTC()
 	memberStruct.UpdatedAt = time.Now().UTC()
 	memberStruct.ActivatedAt = time.Now().UTC()
@@ -81,7 +81,7 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-	member := &member.Member{}
+	member := &model.Member{}
 	err = postgresDB.Where("email = ?", req.Email).First(&member).Error
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

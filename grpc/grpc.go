@@ -2,8 +2,8 @@ package grpc
 
 import (
 	"context"
-	"github.com/junminhong/member-services-center/app/proto/member"
-	"github.com/junminhong/member-services-center/app/services/jwt"
+	"github.com/junminhong/member-services-center/grpc/proto"
+	"github.com/junminhong/member-services-center/pkg/jwt"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -12,8 +12,8 @@ import (
 
 type Server struct{}
 
-func (s Server) VerifyAccessToken(ctx context.Context, request *member.TokenAuthRequest) (*member.TokenAuthResponse, error) {
-	response := &member.TokenAuthResponse{Response: jwt.VerifyAccessToken(request.Token)}
+func (s Server) VerifyAccessToken(ctx context.Context, request *proto.TokenAuthRequest) (*proto.TokenAuthResponse, error) {
+	response := &proto.TokenAuthResponse{Response: jwt.VerifyAccessToken(request.Token)}
 	return response, nil
 }
 
@@ -27,7 +27,7 @@ func InitGRpcServer(intiServerWg *sync.WaitGroup) {
 		log.Fatalf("failed to listen: %v \n", err)
 	}
 	gRpcServer := grpc.NewServer()
-	member.RegisterTokenAuthServiceServer(gRpcServer, &Server{})
+	proto.RegisterTokenAuthServiceServer(gRpcServer, &Server{})
 
 	if err := gRpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v \n", err)

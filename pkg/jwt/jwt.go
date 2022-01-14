@@ -3,7 +3,7 @@ package jwt
 import (
 	"context"
 	"github.com/golang-jwt/jwt"
-	"github.com/junminhong/member-services-center/config/database"
+	"github.com/junminhong/member-services-center/db/redis"
 	"io/ioutil"
 	"log"
 	"os"
@@ -14,7 +14,7 @@ import (
 
 var ctx = context.Background()
 
-var redisClient = database.InitRedis()
+var redisClient = redis.InitRedis()
 
 func getLocalSecretKey(fileName string) []byte {
 	nowWorkDir, err := os.Getwd()
