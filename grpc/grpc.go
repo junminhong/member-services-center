@@ -17,7 +17,7 @@ func (s Server) VerifyAccessToken(ctx context.Context, request *proto.TokenAuthR
 	return response, nil
 }
 
-func InitGRpcServer(intiServerWg *sync.WaitGroup) {
+func SetupServer(intiServerWg *sync.WaitGroup) {
 	defer intiServerWg.Done()
 	log.Println("starting gRPC server...")
 	log.Println("Listening and serving HTTP on :127.0.0.1:2021")
