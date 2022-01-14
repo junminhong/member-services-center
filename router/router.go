@@ -24,7 +24,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func SetupRouter(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
+func Init(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
 	defer intiServerWg.Done()
 	router := gin.Default()
 	router.Use(CORSMiddleware())
