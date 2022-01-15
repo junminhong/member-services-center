@@ -5,8 +5,8 @@ import (
 )
 
 type Member struct {
-	ID                int `gorm:"primaryKey"`
-	Email             string
+	ID                int    `gorm:"primaryKey"`
+	Email             string `gorm:"unique"`
 	Password          string
 	AccessToken       string
 	RefreshToken      string

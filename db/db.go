@@ -3,14 +3,20 @@ package db
 import (
 	"github.com/junminhong/member-services-center/db/postgresql"
 	"github.com/junminhong/member-services-center/model"
-	"log"
-
-	"gorm.io/gorm"
+	"github.com/junminhong/member-services-center/pkg/logger"
 )
 
-var PostgresDB = postgresql.GetDB()
+var postgresDB = postgresql.GetDB()
+var sugar = logger.Init()
 
-func MigrateDB(db *gorm.DB) {
-	log.Println("初始化DB Data")
-	db.AutoMigrate(&model.Member{})
+func MigrateDB() {
+	defer sugar.Sync()
+	if !postgresDB.Migrator().HasTable(&model.Member{}) {
+		return
+	}
+	sugar.Info("migration db...")
+	err := postgresDB.AutoMigrate(&model.Member{})
+	if err != nil {
+		sugar.Error(err.Error())
+	}
 }
