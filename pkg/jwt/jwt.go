@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt"
 	"github.com/junminhong/member-services-center/db/redis"
+	"github.com/junminhong/member-services-center/pkg/logger"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,7 +14,7 @@ import (
 )
 
 var ctx = context.Background()
-
+var sugar = logger.Setup()
 var redisClient = redis.Setup()
 
 func getLocalSecretKey(fileName string) []byte {
@@ -44,16 +45,16 @@ func GenerateAccessToken(memberID int) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(getLocalSecretKey("key"))
 	if err != nil {
-		log.Println(err.Error())
+		sugar.Info(err.Error())
 	}
 	accessToken, err := token.SignedString(privateKey)
 	if err != nil {
-		log.Println(err.Error())
+		sugar.Info(err.Error())
 	}
 	//redisClient := database.InitRedis()
 	err = redisClient.Set(ctx, accessToken, memberID, 600*time.Second).Err()
 	if err != nil {
-		log.Println(err.Error())
+		sugar.Info(err.Error())
 	}
 	return accessToken
 }
@@ -63,7 +64,7 @@ func VerifyAccessToken(accessToken string) bool {
 	tokenParts := strings.Split(accessToken, ".")
 	err := jwt.SigningMethodRS256.Verify(strings.Join(tokenParts[0:2], "."), tokenParts[2], PUBKEY)
 	if err != nil {
-		log.Println(err.Error())
+		sugar.Info(err.Error())
 	}
 	type MyCustomClaims struct {
 		jwt.StandardClaims
@@ -72,7 +73,7 @@ func VerifyAccessToken(accessToken string) bool {
 		return PUBKEY, nil
 	})
 	if err != nil {
-		log.Println(err.Error())
+		sugar.Info(err.Error())
 	}
 	return token.Valid
 }
