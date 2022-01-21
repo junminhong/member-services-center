@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Init() *zap.SugaredLogger {
+func Setup() *zap.SugaredLogger {
 	// 建立一個info會觸發的條件
 	infoLevel := zap.LevelEnablerFunc(func(level zapcore.Level) bool {
 		return level == zapcore.InfoLevel
@@ -32,10 +32,11 @@ func Init() *zap.SugaredLogger {
 		MaxSize:    10,
 		MaxBackups: 3,
 	})
+
 	// 建立兩個core，分別去寫入info和error
 	core := zapcore.NewTee(
 		zapcore.NewCore(
-			zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+			zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()),
 			// 這邊用Multi是因為要同時寫入檔案也要同時show在console
 			zapcore.NewMultiWriteSyncer(stdoutSyncer, accessWriter),
 			infoLevel,
@@ -49,5 +50,6 @@ func Init() *zap.SugaredLogger {
 
 	// 要記得加個caller和stacktrace
 	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+
 	return logger.Sugar()
 }

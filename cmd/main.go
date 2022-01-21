@@ -22,11 +22,9 @@ import (
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      localhost:8080
+// @host      127.0.0.1:9010
 // @BasePath  /api/v1
-
-// @securityDefinitions.basic  BasicAuth
-var sugar = logger.Init()
+var sugar = logger.Setup()
 
 func main() {
 	// 專案初始化要用這個建立資料庫
