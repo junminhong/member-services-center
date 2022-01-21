@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"github.com/junminhong/member-services-center/db/postgresql"
 	"github.com/junminhong/member-services-center/model"
 	"github.com/junminhong/member-services-center/pkg/handler"
@@ -8,7 +9,6 @@ import (
 	"github.com/junminhong/member-services-center/pkg/logger"
 	"github.com/junminhong/member-services-center/pkg/smtp"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -19,9 +19,9 @@ var postgresDB = postgresql.GetDB()
 var sugar = logger.Setup()
 
 type registerReq struct {
-	Email       string `form:"email" json:"email" binding:"required"`
-	Password    string `form:"password" json:"password" binding:"required"`
-	RepPassword string `form:"rep-password" json:"rep-password" binding:"required"`
+	Email       string `json:"email" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+	RepPassword string `json:"rep_password" binding:"required"`
 }
 
 // Register
@@ -91,43 +91,95 @@ func registerHandler(request *registerReq) *handler.Response {
 	return response
 }
 
-type loginReq struct {
+type LoginReq struct {
 	Email    string `form:"email" json:"email" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
+type loginData struct {
+	AccessToken string `json:"access_token"`
+}
 
+// Login
+// @Summary 登入會員帳號
+// @Tags member
+// @version 1.0
+// @Accept application/json
+// @produce application/json
+// @param data body LoginReq true "登入資料"
+// @Success 200 {object} handler.Response
+// @Router /member/login [post]
 func Login(c *gin.Context) {
-	req := &loginReq{}
-	err := c.BindJSON(req)
+	request := &LoginReq{}
+	err := c.BindJSON(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "請傳送正確資料",
+		c.JSON(handler.BadRequest, handler.Response{
+			ResultCode: handler.BadRequest,
+			Message:    handler.ResponseFlag[handler.BadRequest],
+			Data:       "",
+			TimeStamp:  time.Now().UTC(),
 		})
 		return
 	}
+	response := loginHandler(request.Email, request.Password)
+	c.JSON(response.ResultCode, response)
+}
+func loginHandler(email string, password string) handler.Response {
 	member := &model.Member{}
-	err = postgresDB.Where("email = ?", req.Email).First(&member).Error
+	err := postgresDB.Where("email = ?", email).First(&member).Error
+	var response handler.Response
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "查無此會員訊息",
-		})
-		return
+		response = handler.Response{
+			ResultCode: handler.BadRequest,
+			Message:    "信箱輸入錯誤",
+			Data:       "",
+			TimeStamp:  time.Now().UTC(),
+		}
+		return response
 	}
-	if req.Password == member.Password {
-		accessToken := jwt.GenerateAccessToken(member.ID)
-		c.JSON(http.StatusOK, gin.H{
-			"token":      accessToken,
-			"email-auth": member.EmailAuth,
-		})
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "密碼錯誤",
-		})
+	if password != member.Password {
+		response = handler.Response{
+			ResultCode: handler.BadRequest,
+			Message:    "密碼輸入錯誤",
+			Data:       "",
+			TimeStamp:  time.Now().UTC(),
+		}
+		return response
 	}
+	if !member.EmailAuth {
+		response = handler.Response{
+			ResultCode: handler.BadRequest,
+			Message:    "該用戶信箱未認證",
+			Data:       "",
+			TimeStamp:  time.Now().UTC(),
+		}
+		return response
+	}
+	accessToken := jwt.GenerateAccessToken(member.ID)
+	response = handler.Response{
+		ResultCode: handler.OK,
+		Message:    "登入成功",
+		Data:       loginData{AccessToken: accessToken},
+		TimeStamp:  time.Now().UTC(),
+	}
+	return response
 }
 
 func TokenAuth(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
 	tokenParts := strings.Split(token, "Bearer ")
-	log.Println(jwt.VerifyAccessToken(tokenParts[1]))
+	if !jwt.VerifyAccessToken(tokenParts[1]) {
+		c.JSON(handler.Forbidden, handler.Response{
+			ResultCode: handler.Forbidden,
+			Message:    "access token驗證失敗",
+			Data:       "",
+			TimeStamp:  time.Now().UTC(),
+		})
+		return
+	}
+	// 如果token是合法的就拿token去跟redis換member id回來
+	memberID, err := redisClient.Get(context.Background(), tokenParts[1]).Result()
+	if err != nil {
+		sugar.Info(err.Error())
+	}
+	log.Println(memberID)
 }
