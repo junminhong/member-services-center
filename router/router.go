@@ -37,7 +37,7 @@ func Init(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
 	{
 		memberRouter.POST("/register", v1.Register)
 		memberRouter.POST("/login", v1.Login)
-		memberRouter.POST("/email-auth", v1.VerifyEmail)
+		memberRouter.GET("/email-auth/:emailToken", v1.VerifyEmail)
 		memberRouter.POST("/token-auth", v1.TokenAuth)
 	}
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
