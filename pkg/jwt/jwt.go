@@ -14,7 +14,7 @@ import (
 
 var ctx = context.Background()
 
-var redisClient = redis.InitRedis()
+var redisClient = redis.Setup()
 
 func getLocalSecretKey(fileName string) []byte {
 	nowWorkDir, err := os.Getwd()

@@ -2,13 +2,25 @@ package redis
 
 import (
 	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
+	"github.com/junminhong/member-services-center/pkg/logger"
+	"os"
 )
 
-func InitRedis() *redis.Client {
+var sugar = logger.Setup()
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		sugar.Info(err.Error())
+	}
+}
+
+func Setup() *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "@test#test", // no password set
-		DB:       0,            // use default DB
+		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"), // no password set
+		DB:       0,                           // use default DB
 	})
 	return client
 }

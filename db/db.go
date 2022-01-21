@@ -7,11 +7,11 @@ import (
 )
 
 var postgresDB = postgresql.GetDB()
-var sugar = logger.Init()
+var sugar = logger.Setup()
 
 func MigrateDB() {
 	defer sugar.Sync()
-	if !postgresDB.Migrator().HasTable(&model.Member{}) {
+	if postgresDB.Migrator().HasTable(&model.Member{}) {
 		return
 	}
 	sugar.Info("migration db...")
