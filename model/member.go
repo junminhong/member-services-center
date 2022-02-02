@@ -21,7 +21,7 @@ import (
 type Member struct {
 	gorm.Model
 	ID                 int    `gorm:"primaryKey"`
-	uuid               string `gorm:"index;unique"`
+	UUID               string `gorm:"index;unique"`
 	Email              string `gorm:"unique"`
 	Password           string
 	AtomicToken        string

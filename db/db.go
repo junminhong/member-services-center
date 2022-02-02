@@ -11,11 +11,8 @@ var sugar = logger.Setup()
 
 func MigrateDB() {
 	defer sugar.Sync()
-	if postgresDB.Migrator().HasTable(&model.Member{}) {
-		return
-	}
 	sugar.Info("migration db...")
-	err := postgresDB.AutoMigrate(&model.Member{})
+	err := postgresDB.AutoMigrate(&model.Member{}, &model.MemberInfo{})
 	if err != nil {
 		sugar.Error(err.Error())
 	}
