@@ -21,23 +21,23 @@ func updateEmailAuth(email string) bool {
 }
 
 func VerifyEmail(c *gin.Context) {
-	email, err := redisClient.Get(context.Background(), c.Param("emailToken")).Result()
+	email, err := redisClient.Get(context.Background(), c.Query("email_token")).Result()
 	if err != nil {
 		sugar.Info(err.Error())
 	}
 	if email == "" {
-		c.JSON(handler.BadRequest, handler.Response{
-			ResultCode: handler.BadRequest,
-			Message:    "驗證信箱連結已經失效",
+		c.JSON(handler.OK, handler.Response{
+			ResultCode: handler.AuthError2,
+			Message:    handler.ResponseFlag[handler.AuthError2],
 			Data:       "",
 			TimeStamp:  time.Now().UTC(),
 		})
 		return
 	}
 	if updateEmailAuth(email) {
-		c.JSON(handler.BadRequest, handler.Response{
-			ResultCode: handler.BadRequest,
-			Message:    "信箱驗證失敗",
+		c.JSON(handler.OK, handler.Response{
+			ResultCode: handler.AuthError3,
+			Message:    handler.ResponseFlag[handler.AuthError3],
 			Data:       "",
 			TimeStamp:  time.Now().UTC(),
 		})
@@ -48,8 +48,8 @@ func VerifyEmail(c *gin.Context) {
 		sugar.Info(err.Error())
 	}
 	c.JSON(handler.OK, handler.Response{
-		ResultCode: handler.OK,
-		Message:    "信箱驗證成功",
+		ResultCode: handler.AuthOK1,
+		Message:    handler.ResponseFlag[handler.AuthOK1],
 		Data:       "",
 		TimeStamp:  time.Now().UTC(),
 	})
