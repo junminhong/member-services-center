@@ -19,6 +19,7 @@ const (
 	Unauthorized = 401
 	Forbidden    = 403
 	NotFound     = 404
+	TokenError1  = 1001
 )
 
 var ResponseFlag = map[int]string{
@@ -30,6 +31,7 @@ var ResponseFlag = map[int]string{
 	Unauthorized: "該請求未經過認證",
 	Forbidden:    "你的權限不足以發起該請求",
 	NotFound:     "",
+	TokenError1:  "token驗證失敗",
 }
 
 type Response struct {

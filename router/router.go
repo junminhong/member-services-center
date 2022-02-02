@@ -28,17 +28,20 @@ func Init(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
 	defer intiServerWg.Done()
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	var apiVersionTmp *gin.RouterGroup
+	var apiRouter *gin.RouterGroup
 	switch apiVersion {
 	case "v1", "V1":
-		apiVersionTmp = router.Group("/api/v1")
+		apiRouter = router.Group("/api/v1")
 	}
-	memberRouter := apiVersionTmp.Group("/member")
+	memberRouter := apiRouter.Group("/member")
 	{
 		memberRouter.POST("/register", v1.Register)
 		memberRouter.POST("/login", v1.Login)
-		memberRouter.GET("/email-auth/:emailToken", v1.VerifyEmail)
-		memberRouter.POST("/token-auth", v1.TokenAuth)
+	}
+	authRouter := apiRouter.Group("/auth")
+	{
+		authRouter.GET("/email", v1.VerifyEmail)
+		authRouter.GET("/member", v1.TokenAuth)
 	}
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
 		ginSwagger.DefaultModelsExpandDepth(-1)))
