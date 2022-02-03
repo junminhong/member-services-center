@@ -17,6 +17,13 @@ var ctx = context.Background()
 var sugar = logger.Setup()
 var redisClient = redis.Setup()
 
+const (
+	// atomic token有效期限分鐘為單位
+	atomicTokenLimitTime = 60
+	// RefreshAtomicTokenExpired refresh atomic token有效期限小時為單位
+	RefreshAtomicTokenExpired = 24
+)
+
 func getLocalSecretKey(fileName string) []byte {
 	nowWorkDir, err := os.Getwd()
 	if err != nil {
@@ -29,7 +36,31 @@ func getLocalSecretKey(fileName string) []byte {
 	return SECRETKEY
 }
 
-func GenerateAccessToken(memberID int) string {
+func GenerateRefreshAtomicToken(memberUUID string) string {
+	now := time.Now()
+	jwtID := strconv.FormatInt(now.Unix(), 10)
+	claims := &jwt.StandardClaims{
+		ExpiresAt: now.Add(RefreshAtomicTokenExpired * time.Hour).Unix(),
+		Id:        jwtID,
+		IssuedAt:  now.Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(getLocalSecretKey("key"))
+	if err != nil {
+		sugar.Info(err.Error())
+	}
+	refreshAtomicToken, err := token.SignedString(privateKey)
+	if err != nil {
+		sugar.Info(err.Error())
+	}
+	err = redisClient.Set(ctx, refreshAtomicToken, memberUUID, RefreshAtomicTokenExpired*time.Hour).Err()
+	if err != nil {
+		sugar.Info(err.Error())
+	}
+	return refreshAtomicToken
+}
+
+func GenerateAccessToken(memberUUID string) string {
 	type MyCustomClaims struct {
 		jwt.StandardClaims
 	}
@@ -37,7 +68,7 @@ func GenerateAccessToken(memberID int) string {
 	jwtID := strconv.FormatInt(now.Unix(), 10)
 	claims := MyCustomClaims{
 		jwt.StandardClaims{
-			ExpiresAt: now.Add(600 * time.Second).Unix(),
+			ExpiresAt: now.Add(atomicTokenLimitTime * time.Minute).Unix(),
 			Id:        jwtID,
 			IssuedAt:  now.Unix(),
 		},
@@ -47,21 +78,21 @@ func GenerateAccessToken(memberID int) string {
 	if err != nil {
 		sugar.Info(err.Error())
 	}
-	accessToken, err := token.SignedString(privateKey)
+	atomicToken, err := token.SignedString(privateKey)
 	if err != nil {
 		sugar.Info(err.Error())
 	}
 	//redisClient := database.InitRedis()
-	err = redisClient.Set(ctx, accessToken, memberID, 600*time.Second).Err()
+	err = redisClient.Set(ctx, atomicToken, memberUUID, atomicTokenLimitTime*time.Minute).Err()
 	if err != nil {
 		sugar.Info(err.Error())
 	}
-	return accessToken
+	return atomicToken
 }
 
-func VerifyAccessToken(accessToken string) bool {
+func VerifyAtomicToken(atomicToken string) bool {
 	PUBKEY, _ := jwt.ParseRSAPublicKeyFromPEM(getLocalSecretKey("pubkey"))
-	tokenParts := strings.Split(accessToken, ".")
+	tokenParts := strings.Split(atomicToken, ".")
 	err := jwt.SigningMethodRS256.Verify(strings.Join(tokenParts[0:2], "."), tokenParts[2], PUBKEY)
 	if err != nil {
 		sugar.Info(err.Error())
@@ -69,7 +100,7 @@ func VerifyAccessToken(accessToken string) bool {
 	type MyCustomClaims struct {
 		jwt.StandardClaims
 	}
-	token, err := jwt.ParseWithClaims(accessToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(atomicToken, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return PUBKEY, nil
 	})
 	if err != nil {

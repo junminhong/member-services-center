@@ -17,7 +17,7 @@ var redisClient = redis.Setup()
 type Server struct{}
 
 func (s Server) VerifyAccessToken(ctx context.Context, request *proto.TokenAuthRequest) (*proto.TokenAuthResponse, error) {
-	if !jwt.VerifyAccessToken(request.Token) {
+	if !jwt.VerifyAtomicToken(request.Token) {
 		return nil, nil
 	}
 	memberID, err := redisClient.Get(context.Background(), request.Token).Result()
