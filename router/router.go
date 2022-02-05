@@ -38,14 +38,13 @@ func Init(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
 		memberRouter.POST("/register", v1.Register)
 		memberRouter.POST("/login", v1.Login)
 		memberRouter.PUT("/reset-password", v1.ResetPassword)
-		memberRouter.POST("/resend-email", v1.ResendEmail)
 		memberRouter.PUT("/profile", v1.EditProfile)
 		memberRouter.GET("/profile", v1.GetProfile)
 	}
 	authRouter := apiRouter.Group("/auth")
 	{
 		authRouter.GET("/email", v1.VerifyEmail)
-		authRouter.GET("/member", v1.TokenAuth)
+		authRouter.GET("/atomic-token", v1.TokenAuth)
 		authRouter.POST("/resend-email", v1.ResendEmail)
 	}
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
