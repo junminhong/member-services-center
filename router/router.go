@@ -40,6 +40,8 @@ func Init(apiVersion string, intiServerWg *sync.WaitGroup) *gin.Engine {
 		memberRouter.PUT("/reset-password", v1.ResetPassword)
 		memberRouter.PUT("/profile", v1.EditProfile)
 		memberRouter.GET("/profile", v1.GetProfile)
+		memberRouter.POST("/upload-mug-shot", v1.UploadMugShot)
+
 	}
 	authRouter := apiRouter.Group("/auth")
 	{

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/junminhong/member-services-center/db"
 	_ "github.com/junminhong/member-services-center/docs"
 	"github.com/junminhong/member-services-center/grpc"
 	"github.com/junminhong/member-services-center/pkg/logger"
@@ -28,7 +27,7 @@ var sugar = logger.Setup()
 
 func main() {
 	// 專案初始化要用這個建立資料庫
-	db.MigrateDB()
+	//db.MigrateDB()
 
 	// 這裡切換api version是指切換公開出去的api url會隨著版本改變
 	// ex: 切換v1 host/api/v1/xxx

@@ -39,6 +39,8 @@ const (
 	ResetPasswordError2 = 2001
 	ResetPasswordError3 = 2002
 	ResetPasswordOK1    = 2100
+	UploadFileError1    = 2200
+	UploadFileOK1       = 2300
 )
 
 var ResponseFlag = map[int]string{
@@ -70,6 +72,8 @@ var ResponseFlag = map[int]string{
 	ResetPasswordError2: "找不到該用戶",
 	ResetPasswordError3: "更改密碼失敗",
 	ResetPasswordOK1:    "更改密碼成功",
+	UploadFileError1:    "上傳大頭照失敗",
+	UploadFileOK1:       "上傳大頭照成功",
 }
 
 type Response struct {

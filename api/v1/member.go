@@ -5,10 +5,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/junminhong/member-services-center/db/postgresql"
 	"github.com/junminhong/member-services-center/model"
+	"github.com/junminhong/member-services-center/pkg/gcp"
 	"github.com/junminhong/member-services-center/pkg/handler"
 	"github.com/junminhong/member-services-center/pkg/jwt"
 	"github.com/junminhong/member-services-center/pkg/logger"
 	"github.com/junminhong/member-services-center/pkg/smtp"
+	"mime/multipart"
+	"net/http"
 	"strings"
 	"time"
 
@@ -41,7 +44,7 @@ func Register(c *gin.Context) {
 			ResultCode: handler.RequestFormatError1,
 			Message:    handler.ResponseFlag[handler.RequestFormatError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -52,7 +55,7 @@ func Register(c *gin.Context) {
 			ResultCode: handler.RegisterError2,
 			Message:    handler.ResponseFlag[handler.RegisterError2],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -82,14 +85,14 @@ func registerHandler(request *registerReq) *handler.Response {
 			ResultCode: handler.RegisterError1,
 			Message:    handler.ResponseFlag[handler.RegisterError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		}
 	}
 	return &handler.Response{
 		ResultCode: handler.RegisterOK1,
 		Message:    handler.ResponseFlag[handler.RegisterOK1],
 		Data:       "",
-		TimeStamp:  time.Now().UTC(),
+		TimeStamp:  time.Now(),
 	}
 }
 
@@ -119,7 +122,7 @@ func Login(c *gin.Context) {
 			ResultCode: handler.RequestFormatError1,
 			Message:    handler.ResponseFlag[handler.RequestFormatError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -136,7 +139,7 @@ func loginHandler(email string, password string) handler.Response {
 			ResultCode: handler.LoginError1,
 			Message:    handler.ResponseFlag[handler.LoginError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		}
 		return response
 	}
@@ -145,7 +148,7 @@ func loginHandler(email string, password string) handler.Response {
 			ResultCode: handler.LoginError2,
 			Message:    handler.ResponseFlag[handler.LoginError2],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		}
 		return response
 	}
@@ -154,7 +157,7 @@ func loginHandler(email string, password string) handler.Response {
 			ResultCode: handler.LoginError3,
 			Message:    handler.ResponseFlag[handler.LoginError3],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		}
 		return response
 	}
@@ -170,7 +173,7 @@ func loginHandler(email string, password string) handler.Response {
 			AtomicToken:        atomicToken,
 			RefreshAtomicToken: refreshAtomicToken,
 		},
-		TimeStamp: time.Now().UTC(),
+		TimeStamp: time.Now(),
 	}
 	member.AtomicToken = atomicToken
 	member.RefreshAtomicToken = refreshAtomicToken
@@ -187,7 +190,7 @@ func TokenAuth(c *gin.Context) {
 			ResultCode: handler.AuthError1,
 			Message:    handler.ResponseFlag[handler.AuthError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -195,7 +198,7 @@ func TokenAuth(c *gin.Context) {
 		ResultCode: handler.AuthOK2,
 		Message:    handler.ResponseFlag[handler.AuthOK2],
 		Data:       "",
-		TimeStamp:  time.Now().UTC(),
+		TimeStamp:  time.Now(),
 	})
 }
 
@@ -203,7 +206,7 @@ func authToken(atomicToken string) string {
 	if !jwt.VerifyAtomicToken(atomicToken) {
 		return ""
 	}
-	// 如果token是合法的就拿token去跟redis換member id回來
+	// 如果token是合法的就拿token去跟redis換member uuid回來
 	memberUUID, err := redisClient.Get(context.Background(), atomicToken).Result()
 	if err != nil {
 		sugar.Info(err.Error())
@@ -224,7 +227,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.RequestFormatError1,
 			Message:    handler.ResponseFlag[handler.RequestFormatError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -235,7 +238,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.AuthError4,
 			Message:    handler.ResponseFlag[handler.AuthError4],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -244,7 +247,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.AuthError4,
 			Message:    handler.ResponseFlag[handler.AuthError4],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -255,7 +258,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.AuthError1,
 			Message:    handler.ResponseFlag[handler.AuthError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -267,7 +270,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.ResetPasswordError2,
 			Message:    handler.ResponseFlag[handler.ResetPasswordError2],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 	}
 	if strings.Compare(member.Password, request.OldPassword) != 0 {
@@ -275,7 +278,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.ResetPasswordError1,
 			Message:    handler.ResponseFlag[handler.ResetPasswordError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -286,7 +289,7 @@ func ResetPassword(c *gin.Context) {
 			ResultCode: handler.ResetPasswordError3,
 			Message:    handler.ResponseFlag[handler.ResetPasswordError3],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -294,7 +297,7 @@ func ResetPassword(c *gin.Context) {
 		ResultCode: handler.ResetPasswordOK1,
 		Message:    handler.ResponseFlag[handler.ResetPasswordOK1],
 		Data:       "",
-		TimeStamp:  time.Now().UTC(),
+		TimeStamp:  time.Now(),
 	})
 }
 
@@ -311,7 +314,7 @@ func ResendEmail(c *gin.Context) {
 			ResultCode: handler.RequestFormatError1,
 			Message:    handler.ResponseFlag[handler.RequestFormatError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -320,7 +323,7 @@ func ResendEmail(c *gin.Context) {
 			ResultCode: handler.SmtpError1,
 			Message:    handler.ResponseFlag[handler.SmtpError1],
 			Data:       "",
-			TimeStamp:  time.Now().UTC(),
+			TimeStamp:  time.Now(),
 		})
 		return
 	}
@@ -328,7 +331,7 @@ func ResendEmail(c *gin.Context) {
 		ResultCode: handler.SmtpOK1,
 		Message:    handler.ResponseFlag[handler.SmtpOK1],
 		Data:       "",
-		TimeStamp:  time.Now().UTC(),
+		TimeStamp:  time.Now(),
 	})
 }
 
@@ -341,5 +344,43 @@ func EditProfile(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	c.JSON(handler.OK, handler.Response{
 		Message: "取得",
+	})
+}
+
+type uploadMugShotRequest struct {
+	MugShot *multipart.FileHeader `form:"mug_shot"`
+}
+
+// UploadMugShot 根據token就可以知道該大頭貼是哪一位用戶的
+func UploadMugShot(c *gin.Context) {
+	request := &uploadMugShotRequest{}
+	err := c.Bind(request)
+	//file, err := c.FormFile("mug_shot")
+	file, uploadFile, err := c.Request.FormFile("mug_shot")
+	//c.Request.FormFile("file")
+	if err != nil {
+		sugar.Info(err.Error())
+		c.JSON(handler.OK, handler.Response{
+			ResultCode: handler.RequestFormatError1,
+			Message:    handler.ResponseFlag[handler.RequestFormatError1],
+			Data:       "",
+			TimeStamp:  time.Now(),
+		})
+		return
+	}
+	gcp.InsertFileToGCS("mug-shot/", uploadFile, file)
+	c.JSON(handler.OK, handler.Response{
+		ResultCode: handler.OK,
+		Message:    "上傳重工",
+		Data:       request.MugShot.Filename,
+		TimeStamp:  time.Now(),
+	})
+}
+
+func GetMugShot(c *gin.Context) {
+	tmp := gcp.GetFileForGCS("mug-shot/test.jpg")
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "file uploaded successfully",
+		"pathname": tmp,
 	})
 }
