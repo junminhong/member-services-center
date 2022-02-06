@@ -7,3 +7,4 @@ pubkey.pem
 *.pb.go
 docs
 log
+*.json
